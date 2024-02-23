@@ -1,4 +1,4 @@
-# voltatrack
+# Voltatrack
 ## Volta Charging Tracker
 
 * Mapbox integration
