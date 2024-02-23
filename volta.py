@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import json
 import time
+import getLocations as gl
 
 # Assuming you've defined your API URL and headers as in the original script
 url = 'https://api.voltaapi.com/v1/pg-graphql'
@@ -11,12 +12,19 @@ headers = {
     'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
 }
 
-location_node_ids = [
-    "WyJzaXRlcyIsIjE4NThlZTRiLTA2ZDgtNGMzZC1iZDkwLWRmNWJjOWE2NmQwMiJd",
-    "WyJzaXRlcyIsImEyYmQzZWMyLTNmMDEtNGZiOS1iNTM4LTU2OWEzNTY0NzM5MCJd",
-    "WyJzaXRlcyIsIjEzOTMyMGNiLTRjMzQtNGVjMC04OTAwLTJkNDgxZWE5MzMwMSJd"
-    # Add more Node IDs here as strings
-]
+distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2)
+retValues = gl.getLocationWithin(distance, gl.current_coords)
+
+location_node_ids = []
+for location in retValues:
+    location_node_ids.append(location['nodeId'])
+
+# location_node_ids = [
+#     "WyJzaXRlcyIsIjE4NThlZTRiLTA2ZDgtNGMzZC1iZDkwLWRmNWJjOWE2NmQwMiJd",
+#     "WyJzaXRlcyIsImEyYmQzZWMyLTNmMDEtNGZiOS1iNTM4LTU2OWEzNTY0NzM5MCJd",
+#     "WyJzaXRlcyIsIjEzOTMyMGNiLTRjMzQtNGVjMC04OTAwLTJkNDgxZWE5MzMwMSJd", # Los Angeles, CA
+#     # Add more Node IDs here as strings
+# ]
 
 def fetch_station_data(location_node_id):
     data = {
@@ -62,7 +70,7 @@ def display_title():
 
     with placeholder1.container():
         if state:
-            st.title(':blue[Volta] Charging Tracker')
+            st.title(':red[Volta] Charging Tracker')
         else:
             st.title(':green[Volta] Charging Tracker')
 
