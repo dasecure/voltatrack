@@ -1,8 +1,8 @@
 # voltatrack
 ## Volta Charging Tracker
 
-. Mapbox integration
-. Search for chargers closest to dropped pin
+= Mapbox integration
+= Search for chargers closest to dropped pin
 . Add remove charger location
 set favorites 
 tap to navigate to charger
