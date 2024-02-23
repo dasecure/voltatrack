@@ -3,6 +3,7 @@ import requests
 import json
 import time
 import getLocations as gl
+from streamlit_geolocation import streamlit_geolocation
 
 # Assuming you've defined your API URL and headers as in the original script
 url = 'https://api.voltaapi.com/v1/pg-graphql'
@@ -11,9 +12,14 @@ headers = {
     # Add the rest of your headers here
     'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
 }
-
+newLocation = []
+newLocation = streamlit_geolocation()
 distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2)
-retValues = gl.getLocationWithin(distance, gl.current_coords)
+if newLocation == []:
+  retValues = gl.getLocationWithin(distance, gl.current_coords)
+else:
+  newPos = (newLocation['latitude'], newLocation['longitude'])
+  retValues = gl.getLocationWithin(distance, newPos)
 
 location_node_ids = []
 for location in retValues:
@@ -62,8 +68,6 @@ def fetch_station_data(location_node_id):
 # if the charging state changes, notify the user with a sound
 # https://stackoverflow.com/questions/16573051/sound-alarm-when-code-finishes
 
-import streamlit as st
-
 def display_title():
     # Get the current state
     state = st.session_state.get('title_state', True)
@@ -101,7 +105,7 @@ def display_stations():
                 else:
                     st.write(f"Station #: {station_number} has no EVSEs.")
                     
-# st.title('Volta :blue Charging Tracker')
+   
 placeholder1 = st.empty()
 placeholder = st.empty()
 

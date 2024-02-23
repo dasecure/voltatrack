@@ -41,6 +41,7 @@ with open(file_path, 'r') as file:
     data = json.load(file)
 
 currentPos = get_location_by_ip()
+
 current_coords = (currentPos['latitude'], currentPos['longitude'])
 radius_miles = 5
 
@@ -64,32 +65,6 @@ def getLocationWithin(radius_miles, current_coords):
             "nodeId": item[0],
             "longitude": item[1][0],
             "latitude": item[1][1],
-            # "distance": f"{geodesic(current_coords, item[1]).miles:.2f} miles away"
         })
 
     return locations
-
-# # Extracting locations within 25 miles of Sunnyvale
-# within_radius_locations = []
-# for location in data.get('data', {}).get('locations', {}).get('edges', []):
-#     node = location.get('node', {})
-#     geojson_str = node.get('stationsByLocationId', {}).get('geolocationCentroid', {}).get('geojson')
-#     nodeId = node.get('nodeId')
-#     if geojson_str and nodeId:
-#         coordinates = extract_coordinates(geojson_str)
-#         if coordinates and within_radius(current_coords, coordinates[::-1], radius_miles):
-#             within_radius_locations.append((nodeId, coordinates))
-
-# # return the locations within the radius, along with their nodeId, longitude, and latitude in array format and their respective distances
-# for item in within_radius_locations[:]:
-#     locations = item[0]
-#     # print(json.dumps({
-#     #     "nodeId": item[0],
-#     #     "longitude": item[1][0],
-#     #     "latitude": item[1][1],
-#     #     "distance": f"{geodesic(current_coords, item[1]).miles:.2f} miles away"
-#     # }, indent=2))
-
-# return locations
-
-# getLocationWithin(radius_miles, current_coords)
