@@ -12,6 +12,7 @@ headers = {
     # Add the rest of your headers here
     'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
 }
+
 newLocation = []
 newLocation = streamlit_geolocation()
 distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2)
@@ -82,7 +83,7 @@ def display_title():
     st.session_state['title_state'] = not state
 
 def getColor(state):
-    if state == 'PLUGGED_OUT':
+    if state == 'PLUGGED_OUT' or state == 'IDLE':
         return ':green'
     elif state == 'CHARGING':
         return ':red'
