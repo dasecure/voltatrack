@@ -81,6 +81,13 @@ def display_title():
     # Toggle the state
     st.session_state['title_state'] = not state
 
+def getColor(state):
+    if state == 'PLUGGED_OUT':
+        return ':green'
+    elif state == 'CHARGING':
+        return ':red'
+    else:
+        return ':orange'
 
 def display_stations():
     stations = []
@@ -101,6 +108,8 @@ def display_stations():
                 # Assuming each station has at least one EVSE and we are interested in the first one
                 if node['evses']['edges']:
                     state = node['evses']['edges'][0]['node']['state']
+                    color_code = getColor(state)
+                    state = f"{color_code}[{state}]"
                     st.write(f"{name} Station #: {station_number} Status: {state}")
                 else:
                     st.write(f"Station #: {station_number} has no EVSEs.")
