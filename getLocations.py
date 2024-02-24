@@ -1,7 +1,6 @@
 import json
 import requests
 from geopy.distance import geodesic
-import haversine as hs
 
 # get current location from browser
 def get_location_by_ip():
@@ -66,7 +65,7 @@ def getLocationWithin(radius_miles, current_coords):
             "nodeId": item[0],
             "longitude": item[1][0],
             "latitude": item[1][1],
-            "dist": hs.haversine(current_coords,(item[1][1], item[1][0]))
+            # "dist": hs.haversine(current_coords,(item[1][1], item[1][0]))
         })
 
     return locations
