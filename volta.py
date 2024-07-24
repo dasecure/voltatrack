@@ -154,7 +154,6 @@ if __name__ == "__main__":
         # Add the rest of your headers here
         'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
     }
-    Using object notation
     add_stations = st.sidebar.selectbox(
         "How many stations do you want to find?",
         (5, 10, 15),key = "1"
