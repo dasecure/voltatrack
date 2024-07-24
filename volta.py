@@ -154,10 +154,11 @@ if __name__ == "__main__":
         # Add the rest of your headers here
         'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
     }
-    add_stations = st.sidebar.selectbox(
-        "How many stations do you want to find?",
-        (5, 10, 15),key = "1"
-    )
+
+    # add_stations = st.sidebar.selectbox(
+    #     "How many stations do you want to find?",
+    #     (5, 10, 15),key = ""
+    # )
 
     # Using "with" notation
     with st.sidebar:
@@ -166,5 +167,5 @@ if __name__ == "__main__":
         add_distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2, key = "4")
     
     db_path = 'stations.sqlite' 
-    main(db_path, add_stations, add_poll, add_interval, add_distance)
+    main(db_path, 5, add_poll, add_interval, add_distance)
     # main(db_path, 5, 5, 2, 10)
