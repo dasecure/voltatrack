@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import math
 import sqlite3
+import requests
+import json
 from streamlit_geolocation import streamlit_geolocation
 
 def load_data(db_path):
@@ -39,9 +41,10 @@ def find_adjacent_coords(db, lat, lon, step):
     """
     conn = sqlite3.connect(db_path)
     coords_range = lat-step, lat+step, lon-step, lon+step
-    result = conn.execute("""select name, streetAddress, city, state, zipCode, latitude, longitude from stations where latitude > ? and latitude < ? and longitude > ? and longitude < ?""", coords_range).fetchall()
-    df = pd.DataFrame(result, columns=['name', 'streetAddress', 'city', 'state', 'zipCode', 'latitude', 'longitude'])
+    result = conn.execute("""select nodeId, name, streetAddress, city, state, zipCode, latitude, longitude from stations where latitude > ? and latitude < ? and longitude > ? and longitude < ?""", coords_range).fetchall()
+    df = pd.DataFrame(result, columns=['nodeId','name', 'streetAddress', 'city', 'state', 'zipCode', 'latitude', 'longitude'])
     df['distance'] = df.apply(lambda row: calculate_distance(lat, lon, row['latitude'], row['longitude']), axis=1).round(2)
+    # df['state'] = df.apply(lambda row: fetch_station_state(fetch_station_data(row['nodeId']), row['nodeId']), axis=1)
     df.sort_values(by='distance', inplace=True)
     df['address'] = df['streetAddress'] + ', ' + df['city'] + ', ' + df['state'] + ' ' + df['zipCode']
     return df[['name', 'address', 'latitude', 'longitude','distance']]
@@ -67,7 +70,62 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     r = 3956  # Radius of Earth in kilometers. Use 3956 for miles
     return c * r
 
-def main(db_path):
+def fetch_station_data(location_node_id):
+    data = {
+        "query": """
+        query getStation($locationNodeId: ID!) {
+          locationByNodeId(nodeId: $locationNodeId) {
+            name
+            streetAddress
+            city
+            state
+            zipCode
+            tips
+            imageUrl
+            stationsByLocationId(orderBy: STATION_NUMBER_ASC) {
+              geolocationCentroid {
+                latitude
+                longitude
+              }
+              edges {
+                node {
+                  name
+                  stationNumber
+                  evses {
+                    edges {
+                      node {
+                        state
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """,
+        "variables": {"locationNodeId": location_node_id}
+    }
+    
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    return response.json()
+
+def fetch_station_state(stations_data, location_node_id):
+    # finding the station by nodeId and extracting the state
+    for station in stations_data['data']['locationByNodeId']['stationsByLocationId']['edges']:
+        if station['node']['stationNumber'] == location_node_id:
+            return station['node']['evses']['edges'][0]['node']['state']
+
+
+def getColor(state):
+    if state == 'PLUGGED_OUT' or state == 'IDLE':
+        return ':green'
+    elif state == 'CHARGING':
+        return ':red'
+    else:
+        return ':orange'
+
+def main(db_path, stations, poll_status):
     """
     Main function to display the map in a Streamlit app.
 
@@ -79,15 +137,35 @@ def main(db_path):
         current_location = {'latitude': 37.3688, 'longitude': -122.0363}
     
     st.title("Station Locations")
-    df = find_adjacent_coords(db_path, current_location['latitude'], current_location['longitude'], 0.15)
+    df = find_adjacent_coords(db_path, current_location['latitude'], current_location['longitude'], 0.50)
 
     if not df.empty:
-        st.map(df[['latitude', 'longitude']].head(3))
-        st.table(df.head(3))
+        st.map(df[['latitude', 'longitude']].head(stations))
+        st.table(df[['name', 'address', 'distance']].head(stations))
     else:
         st.write("No data available to plot.")
 
 if __name__ == "__main__":
+# Assuming you've defined your API URL and headers as in the original script
+    url = 'https://api.voltaapi.com/v1/pg-graphql'
+    headers = {
+        'authority': 'api.voltaapi.com',
+        # Add the rest of your headers here
+        'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
+    }
+    # Using object notation
+    add_selectbox = st.sidebar.selectbox(
+        "How many stations do you want to find?",
+        (5, 10, 15)
+    )
+
+    # Using "with" notation
+    with st.sidebar:
+        add_radio = st.radio(
+            "Poll for status?",
+            ("yes", "no")
+        )
+    
     db_path = 'stations.sqlite' 
-    main(db_path)
+    main(db_path, add_selectbox, add_radio)
 

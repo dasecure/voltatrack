@@ -1,30 +1,35 @@
 import streamlit as st
+import pandas as pd
+import math
+import sqlite3
 import requests
 import json
 import time
 import getLocations as gl
 from streamlit_geolocation import streamlit_geolocation
 
-# Assuming you've defined your API URL and headers as in the original script
-url = 'https://api.voltaapi.com/v1/pg-graphql'
-headers = {
-    'authority': 'api.voltaapi.com',
-    # Add the rest of your headers here
-    'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
-}
+def getNodes(distance):
+    newLocation = []
+    newLocation = streamlit_geolocation()
+    if newLocation == []:
+        retValues = gl.getLocationWithin(distance, gl.current_coords)
+    else:
+        newPos = (newLocation['latitude'], newLocation['longitude'])
+        retValues = gl.getLocationWithin(distance, newPos)
 
-newLocation = []
-newLocation = streamlit_geolocation()
-distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2)
-if newLocation == []:
-  retValues = gl.getLocationWithin(distance, gl.current_coords)
-else:
-  newPos = (newLocation['latitude'], newLocation['longitude'])
-  retValues = gl.getLocationWithin(distance, newPos)
+    location_node_ids = []
+    for location in retValues:
+        location_node_ids.append(location['nodeId'])
+    return location_node_ids
+# if newLocation == []:
+#   retValues = gl.getLocationWithin(distance, gl.current_coords)
+# else:
+#   newPos = (newLocation['latitude'], newLocation['longitude'])
+#   retValues = gl.getLocationWithin(distance, newPos)
 
-location_node_ids = []
-for location in retValues:
-    location_node_ids.append(location['nodeId'])
+# location_node_ids = []
+# for location in retValues:
+#     location_node_ids.append(location['nodeId'])
 
 # location_node_ids = [
 #     "WyJzaXRlcyIsIjE4NThlZTRiLTA2ZDgtNGMzZC1iZDkwLWRmNWJjOWE2NmQwMiJd",
@@ -32,6 +37,8 @@ for location in retValues:
 #     "WyJzaXRlcyIsIjEzOTMyMGNiLTRjMzQtNGVjMC04OTAwLTJkNDgxZWE5MzMwMSJd", # Los Angeles, CA
 #     # Add more Node IDs here as strings
 # ]
+
+
 
 def fetch_station_data(location_node_id):
     data = {
@@ -90,7 +97,7 @@ def getColor(state):
     else:
         return ':orange'
 
-def display_stations():
+def display_stations(location_node_ids):
     stations = []
     for node_id in location_node_ids:
         data = fetch_station_data(node_id)
@@ -115,16 +122,49 @@ def display_stations():
                 else:
                     st.write(f"Station #: {station_number} has no EVSEs.")
                     
-   
+
 placeholder1 = st.empty()
 placeholder = st.empty()
 
-# poll display_stations with a variable seconds interval, interval can be incremented or decremented
-interval = st.slider('Polling Interval', min_value=1, max_value=10, value=2)
-poll = st.checkbox('Poll Stations', value=True)
-while poll:
-    display_title()
-    display_stations()
-    time.sleep(interval)
-    if poll == False:
-        break  
+def main(db_path, stations, poll, interval, dist):
+
+  # poll display_stations with a variable seconds interval, interval can be incremented or decremented
+
+  while poll:
+      display_title()
+      display_stations(getNodes(dist))
+      time.sleep(interval)
+      if poll == False:
+          break  
+      
+  # Assuming you've defined your API URL and headers as in the original script
+  url = 'https://api.voltaapi.com/v1/pg-graphql'
+  headers = {
+      'authority': 'api.voltaapi.com',
+      # Add the rest of your headers here
+      'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
+  }
+
+
+if __name__ == "__main__":
+# Assuming you've defined your API URL and headers as in the original script
+    url = 'https://api.voltaapi.com/v1/pg-graphql'
+    headers = {
+        'authority': 'api.voltaapi.com',
+        # Add the rest of your headers here
+        'x-api-key': 'u74w38X44fa7m3calbsu69blJVcC739z8NWJggVv',  # Make sure to use your actual API key
+    }
+    # Using object notation
+    add_stations = st.sidebar.selectbox(
+        "How many stations do you want to find?",
+        (5, 10, 15)
+    )
+
+    # Using "with" notation
+    with st.sidebar:
+        add_interval = st.slider('Polling Interval', min_value=1, max_value=10, value=2)
+        add_poll = st.checkbox('Poll Stations', value=True)
+        add_distance = st.slider('Search radius', min_value=2, max_value=10, value=2, step=2)
+    
+    db_path = 'stations.sqlite' 
+    main(db_path, add_stations, add_poll, add_interval, add_distance)
