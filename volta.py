@@ -82,9 +82,9 @@ def display_title():
 
     with placeholder1.container():
         if state:
-            st.title(':red[Volta] Charging Tracker')
+            st.title(':red[Volta] Charging Tracker - v0.01b')
         else:
-            st.title(':green[Volta] Charging Tracker')
+            st.title(':green[Volta] Charging Tracker - v0.01b')
 
     # Toggle the state
     st.session_state['title_state'] = not state
