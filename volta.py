@@ -168,4 +168,4 @@ if __name__ == "__main__":
     
     db_path = 'stations.sqlite' 
     # main(db_path, add_stations, add_poll, add_interval, add_distance)
-    main(db_path, add_stations, 5, 2, 10)
+    main(db_path, 5, 5, 2, 10)
