@@ -226,7 +226,7 @@ if __name__ == "__main__":
         # add_searchbar = st.text_input("Search address")
         locCount = st.selectbox(
             "How many locations?",
-            (2, 4, 8, 10), key = "location_count"
+            (2, 4, 8, 10), key = locCount
         )
         interval = st.slider(
             'Polling Interval', min_value=1, max_value=10, value=2)
