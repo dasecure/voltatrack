@@ -196,11 +196,23 @@ def update_stationsDB(df_stations):
     conn.commit()
     conn.close()
 
+def get_current_location():
+    # call streamlit_geolocation only if current_location is None
+    # if current_location is None:
+    current_location = streamlit_geolocation()
+
+    # current_location = streamlit_geolocation()
+    if current_location['latitude'] == None:
+        current_location = default_location
+    return current_location
+
 # main function
 def main(db_path):
-    # Set up the sidebar
-    if (current_location['latitude'] == null):
-        current_location = streamlit_geolocation()
+    # # Set up the sidebar
+    # current_location['latitude'] = None
+    # current_location['longitude'] = None
+    global current_location
+    current_location = get_current_location()
     if current_location['latitude'] == None:
         current_location = default_location
         df = find_adjacent_coords(db_path, current_location['latitude'], current_location['longitude'], 0.05)
@@ -228,9 +240,9 @@ if __name__ == "__main__":
         # locCount = st.selectbox(
         #     "How many locations?",
         #     (2, 4, 8, 10), key = locCount
-        # )
-        interval = st.slider(
-            'Polling Interval', min_value=1, max_value=10, value=2)
+        # # )
+        # interval = st.slider(
+        #     'Polling Interval', min_value=1, max_value=10, value=2)
         # add_distance = st.slider(
         #     'Search radius (miles)', min_value=2, max_value=10, value=2, step=1)
         poll = st.checkbox(
@@ -245,9 +257,9 @@ if __name__ == "__main__":
     # st.title(':blue[Volta] Charging Stations')
     db_path = 'stations.sqlite' 
     # This is the main routine
-    while poll:
-      main(db_path)
-      time.sleep(interval)
-      if poll == False:
-          break  
-    # main(db_path)
+    # while poll:
+    #   main(db_path)
+    #   time.sleep(2)
+    #   if poll == False:
+    #       break  
+    main(db_path)
