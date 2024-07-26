@@ -215,7 +215,7 @@ def main(db_path):
             temp = get_stations_with_charging_state(station)
             combined_df = pd.concat([combined_df, temp])
         merged_df = pd.merge(df, combined_df, on='name', how='inner')
-        st.write(merged_df[['node_name', 'charging_states', 'distance']].head(locCount))
+        st.write(merged_df[['node_name', 'charging_states', 'distance']])
 
     add_footer()
 
@@ -224,10 +224,10 @@ if __name__ == "__main__":
     with st.sidebar:
         # st.title("Search address:")
         # add_searchbar = st.text_input("Search address")
-        locCount = st.selectbox(
-            "How many locations?",
-            (2, 4, 8, 10), key = locCount
-        )
+        # locCount = st.selectbox(
+        #     "How many locations?",
+        #     (2, 4, 8, 10), key = locCount
+        # )
         interval = st.slider(
             'Polling Interval', min_value=1, max_value=10, value=2)
         # add_distance = st.slider(
@@ -244,9 +244,9 @@ if __name__ == "__main__":
     # st.title(':blue[Volta] Charging Stations')
     db_path = 'stations.sqlite' 
     # This is the main routine
-    # while poll:
-    #   main(db_path)
-    #   time.sleep(interval)
-    #   if poll == False:
-    #       break  
-    main(db_path)
+    while poll:
+      main(db_path)
+      time.sleep(interval)
+      if poll == False:
+          break  
+    # main(db_path)
