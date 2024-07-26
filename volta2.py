@@ -199,7 +199,8 @@ def update_stationsDB(df_stations):
 # main function
 def main(db_path):
     # Set up the sidebar
-    current_location = streamlit_geolocation()
+    if (current_location['latitude'] == null):
+        current_location = streamlit_geolocation()
     if current_location['latitude'] == None:
         current_location = default_location
         df = find_adjacent_coords(db_path, current_location['latitude'], current_location['longitude'], 0.05)
