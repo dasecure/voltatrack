@@ -18,7 +18,10 @@ display_list = []
 def handle_location_click(location):
     st.session_state.clicked_location = location
     current_user = get_current_user()
-    st.write(f"User {current_user} clicked on location: {location}")
+    if current_user:
+        st.success(f"User {current_user} clicked on location: {location}")
+    else:
+        st.warning("No user is currently logged in.")
 
 # Create users table if it doesn't exist
 create_users_table()
@@ -192,8 +195,19 @@ def main():
         
         # Display the DataFrame with buttons
         for index, row in df.iterrows():
-            if st.button(f"Location: {row['Location']}"):
+            if st.button(f"Location: {row['Location']}", key=f"location_button_{index}"):
                 handle_location_click(row['Location'])
+        
+        # Display clicked location information
+        if 'clicked_location' in st.session_state:
+            st.write("---")
+            st.write("Clicked Location Information:")
+            clicked_row = df[df['Location'] == st.session_state.clicked_location].iloc[0]
+            st.write(f"Location: {clicked_row['Location']}")
+            st.write(f"Charger#: {clicked_row['Charger#']}")
+            st.write("State:")
+            for state in clicked_row['State']:
+                st.markdown(state)
         
         # Close the database connection
 

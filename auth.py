@@ -47,6 +47,7 @@ def login_page():
     if st.button("Login", key="login_button"):
         if verify_user(username, password):
             st.session_state['logged_in'] = True
+            st.session_state['current_user'] = username
             st.success("Logged in successfully!")
             st.experimental_rerun()
         else:
@@ -64,4 +65,8 @@ def signup_page():
 
 def logout():
     st.session_state['logged_in'] = False
+    st.session_state['current_user'] = None
     st.experimental_rerun()
+
+def get_current_user():
+    return st.session_state.get('current_user', None)
