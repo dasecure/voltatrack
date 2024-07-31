@@ -6,7 +6,7 @@ import requests
 import json
 import time
 from streamlit_geolocation import streamlit_geolocation
-from auth import create_users_table, login_page, signup_page, logout
+from auth import create_users_table, login_page, signup_page, logout, get_current_user
 
 # Globals
 default_location = {
@@ -14,6 +14,11 @@ default_location = {
         'longitude': -122.051426
     }
 display_list = []
+
+def handle_location_click(location):
+    st.session_state.clicked_location = location
+    current_user = get_current_user()
+    st.write(f"User {current_user} clicked on location: {location}")
 
 # Create users table if it doesn't exist
 create_users_table()
@@ -181,8 +186,16 @@ def main():
         # Print the results
         for station in nearby_stations:
             get_stations_with_charging_state(station[0])
+        
+        # Create a DataFrame
+        df = pd.DataFrame(display_list)
+        
+        # Display the DataFrame with buttons
+        for index, row in df.iterrows():
+            if st.button(f"Location: {row['Location']}"):
+                handle_location_click(row['Location'])
+        
         # Close the database connection
-        st.write(pd.DataFrame(display_list))
 
         conn.close()
 
