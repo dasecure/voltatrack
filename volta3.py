@@ -83,6 +83,7 @@ def get_stations_with_charging_state(location_node_id):
     stations_data = data['data']['locationByNodeId']['stationsByLocationId']['edges']
     station_name = data['data']['locationByNodeId']['name']
     charging_summary = {"PLUGGED_OUT": 0, "PLUGGED_IN": 0, "IDLE": 0, "CHARGING": 0, "OTHER": 0}
+    stations_info = []
     for station in stations_data:
         station_node = station['node']
         charging_states = [evse['node']['state'] for evse in station_node['evses']['edges']]
@@ -100,14 +101,14 @@ def get_stations_with_charging_state(location_node_id):
             else:
                 colored_states.append(state)
                 charging_summary["OTHER"] += 1
-        display_list.append({
+        stations_info.append({
             "Location": station_node['name'],
             "Charger#": station_node['stationNumber'],
             "State": colored_states
         })
 
     summary_str = f"Available: {charging_summary['PLUGGED_OUT']}, In Use: {charging_summary['CHARGING']}, Other: {charging_summary['PLUGGED_IN'] + charging_summary['IDLE'] + charging_summary['OTHER']}"
-    return summary_str
+    return summary_str, stations_info
 
 # Function to calculate distance between two points using Haversine formula
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -194,23 +195,21 @@ def main():
 
         # Print the results
         for station in nearby_stations:
-            summary = get_stations_with_charging_state(station[0])
+            summary, stations_info = get_stations_with_charging_state(station[0])
             if st.button(f"{station[1]} - {summary}", key=f"location_button_{station[0]}"):
-                handle_location_click(station[1])
-        
-        # Create a DataFrame
-        df = pd.DataFrame(display_list)
-        
+                st.session_state.clicked_location = station[1]
+                st.session_state.clicked_stations_info = stations_info
+
         # Display clicked location information
-        if 'clicked_location' in st.session_state:
+        if 'clicked_location' in st.session_state and 'clicked_stations_info' in st.session_state:
             st.write("---")
-            st.write("Clicked Location Information:")
-            clicked_row = df[df['Location'] == st.session_state.clicked_location].iloc[0]
-            st.write(f"Location: {clicked_row['Location']}")
-            st.write(f"Charger#: {clicked_row['Charger#']}")
-            st.write("State:")
-            for state in clicked_row['State']:
-                st.markdown(state)
+            st.write(f"Clicked Location Information: {st.session_state.clicked_location}")
+            for charger in st.session_state.clicked_stations_info:
+                st.write(f"Charger#: {charger['Charger#']}")
+                st.write("State:")
+                for state in charger['State']:
+                    st.markdown(state)
+                st.write("---")
         
         # Close the database connection
 
