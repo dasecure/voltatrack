@@ -199,17 +199,36 @@ def main():
             if st.button(f"{station[1]} - {summary}", key=f"location_button_{station[0]}"):
                 st.session_state.clicked_location = station[1]
                 st.session_state.clicked_stations_info = stations_info
+                st.session_state.show_details = True
 
         # Display clicked location information
-        if 'clicked_location' in st.session_state and 'clicked_stations_info' in st.session_state:
+        if 'show_details' in st.session_state and st.session_state.show_details:
             st.write("---")
-            st.write(f"Clicked Location Information: {st.session_state.clicked_location}")
+            st.subheader(f"Charger Details for: {st.session_state.clicked_location}")
+            
+            # Create a DataFrame for better display
+            df_data = []
             for charger in st.session_state.clicked_stations_info:
-                st.write(f"Charger#: {charger['Charger#']}")
-                st.write("State:")
-                for state in charger['State']:
-                    st.markdown(state)
-                st.write("---")
+                df_data.append({
+                    "Charger#": charger['Charger#'],
+                    "State": ", ".join([state.replace(":green[", "").replace(":orange[", "").replace(":red[", "").replace("]", "") for state in charger['State']])
+                })
+            
+            df = pd.DataFrame(df_data)
+            
+            # Display the DataFrame
+            st.dataframe(df, hide_index=True)
+            
+            # Display colored states
+            st.write("State Color Code:")
+            st.markdown(":green[Green] - Available (PLUGGED_OUT)")
+            st.markdown(":orange[Orange] - Idle or Plugged In")
+            st.markdown(":red[Red] - In Use (CHARGING)")
+            
+            if st.button("Close Details"):
+                st.session_state.show_details = False
+            
+            st.write("---")
         
         # Close the database connection
 
