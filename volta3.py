@@ -82,6 +82,7 @@ def get_stations_with_charging_state(location_node_id):
     data = get_stations_data(location_node_id)
     stations_data = data['data']['locationByNodeId']['stationsByLocationId']['edges']
     station_name = data['data']['locationByNodeId']['name']
+    charging_summary = {"PLUGGED_OUT": 0, "PLUGGED_IN": 0, "IDLE": 0, "CHARGING": 0, "OTHER": 0}
     for station in stations_data:
         station_node = station['node']
         charging_states = [evse['node']['state'] for evse in station_node['evses']['edges']]
@@ -89,19 +90,24 @@ def get_stations_with_charging_state(location_node_id):
         for state in charging_states:
             if state == 'PLUGGED_OUT':
                 colored_states.append(':green[PLUGGED_OUT]')
+                charging_summary["PLUGGED_OUT"] += 1
             elif state in ['PLUGGED_IN', 'IDLE']:
                 colored_states.append(':orange[' + state + ']')
+                charging_summary[state] += 1
             elif state == 'CHARGING':
                 colored_states.append(':red[CHARGING]')
+                charging_summary["CHARGING"] += 1
             else:
                 colored_states.append(state)
+                charging_summary["OTHER"] += 1
         display_list.append({
             "Location": station_node['name'],
             "Charger#": station_node['stationNumber'],
             "State": colored_states
         })
 
-    return
+    summary_str = f"Available: {charging_summary['PLUGGED_OUT']}, In Use: {charging_summary['CHARGING']}, Other: {charging_summary['PLUGGED_IN'] + charging_summary['IDLE'] + charging_summary['OTHER']}"
+    return summary_str
 
 # Function to calculate distance between two points using Haversine formula
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -188,15 +194,12 @@ def main():
 
         # Print the results
         for station in nearby_stations:
-            get_stations_with_charging_state(station[0])
+            summary = get_stations_with_charging_state(station[0])
+            if st.button(f"{station[1]} - {summary}", key=f"location_button_{station[0]}"):
+                handle_location_click(station[1])
         
         # Create a DataFrame
         df = pd.DataFrame(display_list)
-        
-        # Display the DataFrame with buttons
-        for index, row in df.iterrows():
-            if st.button(f"Location: {row['Location']}", key=f"location_button_{index}"):
-                handle_location_click(row['Location'])
         
         # Display clicked location information
         if 'clicked_location' in st.session_state:
