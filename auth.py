@@ -42,9 +42,9 @@ def verify_user(username, password):
 
 def login_page():
     st.title("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
+    username = st.text_input("Username", key="login_username")
+    password = st.text_input("Password", type="password", key="login_password")
+    if st.button("Login", key="login_button"):
         if verify_user(username, password):
             st.session_state['logged_in'] = True
             st.success("Logged in successfully!")
@@ -54,9 +54,9 @@ def login_page():
 
 def signup_page():
     st.title("Sign Up")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Sign Up"):
+    username = st.text_input("Username", key="signup_username")
+    password = st.text_input("Password", type="password", key="signup_password")
+    if st.button("Sign Up", key="signup_button"):
         if add_user(username, password):
             st.success("User created successfully! Please log in.")
         else:
