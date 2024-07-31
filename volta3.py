@@ -6,6 +6,7 @@ import requests
 import json
 import time
 from streamlit_geolocation import streamlit_geolocation
+from auth import create_users_table, login_page, signup_page, logout
 
 # Globals
 default_location = {
@@ -13,6 +14,9 @@ default_location = {
         'longitude': -122.051426
     }
 display_list = []
+
+# Create users table if it doesn't exist
+create_users_table()
 
 # get station data
 # Function to get stations data
@@ -129,53 +133,58 @@ def get_current_location():
     return current_location
 
 def main():
-    # Display the title
-    display_title()
+    if 'logged_in' not in st.session_state:
+        st.session_state['logged_in'] = False
 
-    st.sidebar.title("Options")
-    with st.sidebar:
-        st.write("Select the maximum distance to search for nearby stations:")
-        max_distance = st.slider("Maximum Distance (km)",  min_value=2, max_value=10, value=4, step=2)
+    if not st.session_state['logged_in']:
+        tab1, tab2 = st.tabs(["Login", "Sign Up"])
+        with tab1:
+            login_page()
+        with tab2:
+            signup_page()
+    else:
+        # Display the title
+        display_title()
 
-    # Connect to your SQLite database
-    conn = sqlite3.connect('stations.sqlite')
-    cursor = conn.cursor()
+        st.sidebar.title("Options")
+        with st.sidebar:
+            st.write("Select the maximum distance to search for nearby stations:")
+            max_distance = st.slider("Maximum Distance (km)",  min_value=2, max_value=10, value=4, step=2)
+            if st.button("Logout"):
+                logout()
 
-    # Your current location (replace with actual values)
-    # 37.73972° N, 121.45117° W
-    # 37.352683, -122.051426
+        # Connect to your SQLite database
+        conn = sqlite3.connect('stations.sqlite')
+        cursor = conn.cursor()
 
-    currentLoc = get_current_location()
-  
-    current_lat = currentLoc['latitude']  # Example: San Francisco latitude
-    current_lon = currentLoc['longitude']  # Example: San Francisco longitude
+        currentLoc = get_current_location()
+    
+        current_lat = currentLoc['latitude']
+        current_lon = currentLoc['longitude']
 
-    # Maximum distance in kilometers
-    max_distance = max_distance  # Change this to your desired radius
+        # Query to fetch all stations
+        cursor.execute("SELECT nodeId, name, latitude, longitude FROM stations")
+        all_stations = cursor.fetchall()
 
-    # Query to fetch all stations
-    cursor.execute("SELECT nodeId, name, latitude, longitude FROM stations")
-    all_stations = cursor.fetchall()
+        # Filter stations within the specified distance
+        nearby_stations = []
+        for station in all_stations:
+            node_id, name, lat, lon = station
+            if lat is not None and lon is not None:
+                distance = haversine_distance(current_lat, current_lon, float(lat), float(lon))
+                if distance <= max_distance:
+                    nearby_stations.append((node_id, name, distance))
 
-    # Filter stations within the specified distance
-    nearby_stations = []
-    for station in all_stations:
-        node_id, name, lat, lon = station
-        if lat is not None and lon is not None:
-            distance = haversine_distance(current_lat, current_lon, float(lat), float(lon))
-            if distance <= max_distance:
-                nearby_stations.append((node_id, name, distance))
+        # Sort the nearby stations by distance
+        nearby_stations.sort(key=lambda x: x[2])
 
-    # Sort the nearby stations by distance
-    nearby_stations.sort(key=lambda x: x[2])
+        # Print the results
+        for station in nearby_stations:
+            get_stations_with_charging_state(station[0])
+        # Close the database connection
+        st.write(pd.DataFrame(display_list))
 
-    # Print the results
-    for station in nearby_stations:
-        get_stations_with_charging_state(station[0])
-    # Close the database connection
-    st.write(pd.DataFrame(display_list))
-
-    conn.close()
+        conn.close()
 
 if __name__ == "__main__":
     main()
