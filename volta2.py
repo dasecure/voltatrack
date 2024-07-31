@@ -224,10 +224,13 @@ def main(db_path):
     # show location of station and respective stations with their charging state
     with st.container():
         combined_df = pd.DataFrame()
+        # print(combined_df)
         for station in df['nodeId']:
             temp = get_stations_with_charging_state(station)
             combined_df = pd.concat([combined_df, temp])
+        # print(combined_df)
         merged_df = pd.merge(df, combined_df, on='name', how='inner')
+        # print(merged_df)
         st.write(merged_df[['node_name', 'charging_states', 'distance']])
 
     add_footer()
