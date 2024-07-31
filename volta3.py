@@ -73,11 +73,20 @@ def get_stations_with_charging_state(location_node_id):
     for station in stations_data:
         station_node = station['node']
         charging_states = [evse['node']['state'] for evse in station_node['evses']['edges']]
+        colored_states = []
+        for state in charging_states:
+            if state == 'PLUGGED_OUT':
+                colored_states.append(':green[PLUGGED_OUT]')
+            elif state in ['PLUGGED_IN', 'IDLE']:
+                colored_states.append(':orange[' + state + ']')
+            elif state == 'CHARGING':
+                colored_states.append(':red[CHARGING]')
+            else:
+                colored_states.append(state)
         display_list.append({
-            # "name": station_name,
             "Location": station_node['name'],
             "Charger#": station_node['stationNumber'],
-            "State": charging_states
+            "State": colored_states
         })
 
     return
