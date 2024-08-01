@@ -221,19 +221,20 @@ def main():
             st.subheader(f"Charger Details for: {st.session_state.clicked_location}")
             
             # Create a DataFrame for better display
-            df_data = []
             for charger in st.session_state.clicked_stations_info:
-                df_data.append({
-                    "Charger#": charger['Charger#'],
-                    "State": ", ".join([state.replace(":green[", "").replace(":orange[", "").replace(":red[", "").replace("]", "") for state in charger['State']])
-                })
-            
-            df = pd.DataFrame(df_data)
-            
-            # Display the DataFrame
-            st.dataframe(df, hide_index=True)
-            
-            # Display colored states
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    st.write(f"Charger #{charger['Charger#']}")
+                with col2:
+                    for state in charger['State']:
+                        if st.button(state, key=f"charger_{charger['Charger#']}_{state}"):
+                            # Update the charger with the user's name
+                            current_user = st.session_state.get('current_user', 'Unknown User')
+                            charger['State'] = [f"{current_user} ({state.split(']')[0].split('[')[1]})"]
+                            st.success(f"Charger #{charger['Charger#']} updated with {current_user}")
+                            st.rerun()
+
+            # Display colored states legend
             st.write("State Color Code:")
             st.markdown(":green[Green] - Available (PLUGGED_OUT)")
             st.markdown(":orange[Orange] - Idle or Plugged In")
