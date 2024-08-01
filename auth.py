@@ -66,7 +66,7 @@ def signup_page():
 def logout():
     st.session_state['logged_in'] = False
     st.session_state['current_user'] = None
-    st.experimental_rerun()
+    st.rerun()
 
 def get_current_user():
     return st.session_state.get('current_user', None)
