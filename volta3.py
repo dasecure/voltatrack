@@ -228,14 +228,22 @@ def main():
                 with col2:
                     for state in charger['State']:
                         button_key = f"charger_{charger['Charger#']}_{state}"
-                        if st.button(state, key=button_key):
-                            current_user = st.session_state.get('current_user', 'Unknown User')
-                            if '[' in state and ']' in state:
-                                # If the state already includes a user, reset it
-                                charger['State'] = [state.split(']')[1].strip()]
+                        current_user = st.session_state.get('current_user', 'Unknown User')
+                        original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
+                        
+                        if '[' in state and ']' in state:
+                            # If the state already includes a user, show only the charging state
+                            button_text = original_state
+                        else:
+                            # Otherwise, show user + charging state
+                            button_text = f"{current_user} [{original_state}]"
+                        
+                        if st.button(button_text, key=button_key):
+                            if '[' in button_text and ']' in button_text:
+                                # If the button text includes a user, reset it to just the charging state
+                                charger['State'] = [original_state]
                             else:
-                                # Otherwise, add the current user
-                                original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
+                                # Otherwise, set it to user + charging state
                                 charger['State'] = [f"{current_user} [{original_state}]"]
                             st.rerun()
 
