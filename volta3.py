@@ -217,7 +217,7 @@ def main():
             df = pd.DataFrame(df_data)
             
             # Display the DataFrame
-            st.write(df, hide_index=True)
+            st.dataframe(df, hide_index=True)
             
             # Display colored states
             st.write("State Color Code:")
