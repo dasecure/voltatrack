@@ -206,10 +206,18 @@ def main():
         # Print the results
         for station in nearby_stations:
             summary, stations_info = get_stations_with_charging_state(station[0])
-            if st.button(f"{station[1]} - {summary}", key=f"location_button_{station[0]}"):
-                st.session_state.clicked_location = station[1]
-                st.session_state.clicked_stations_info = stations_info
-                st.session_state.show_details = True
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                if st.button(f"{station[1]}", key=f"location_button_{station[0]}"):
+                    st.session_state.clicked_location = station[1]
+                    st.session_state.clicked_stations_info = stations_info
+                    st.session_state.show_details = True
+            with col2:
+                state_key = f"state_button_{station[0]}"
+                if state_key not in st.session_state:
+                    st.session_state[state_key] = False
+                if st.button(summary if not st.session_state[state_key] else st.session_state['current_user'], key=state_key):
+                    st.session_state[state_key] = not st.session_state[state_key]
 
         # Display clicked location information
         if 'show_details' in st.session_state and st.session_state.show_details:
