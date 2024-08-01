@@ -233,18 +233,18 @@ def main():
                         
                         if '[' in state and ']' in state:
                             # If the state already includes a user, show only the charging state
-                            button_text = original_state
+                            button_text = f"[] [{original_state}]"
                         else:
                             # Otherwise, show user + charging state
                             button_text = f"{current_user} [{original_state}]"
                         
                         if st.button(button_text, key=button_key):
-                            if '[' in button_text and ']' in button_text:
-                                # If the button text includes a user, reset it to just the charging state
-                                charger['State'] = [original_state]
-                            else:
-                                # Otherwise, set it to user + charging state
+                            if button_text.startswith('[]'):
+                                # If the button text starts with [], change it to include the user
                                 charger['State'] = [f"{current_user} [{original_state}]"]
+                            else:
+                                # Otherwise, set it to [] + charging state
+                                charger['State'] = [f"[] [{original_state}]"]
                             st.rerun()
 
             # Display colored states legend
