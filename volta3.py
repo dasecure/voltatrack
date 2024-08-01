@@ -7,12 +7,9 @@ import json
 import time
 from streamlit_geolocation import streamlit_geolocation
 from auth import create_users_table, login_page, signup_page, logout, get_current_user, check_login_status
-from streamlit_cookies_manager import EncryptedCookieManager
+from auth import get_cookie_manager
 
-cookies = EncryptedCookieManager(
-    prefix="volta_app/",
-    password="your_secret_key_here"  # Replace with the same secret key used in auth.py
-)
+cookies = get_cookie_manager()
 
 # Globals
 default_location = {
