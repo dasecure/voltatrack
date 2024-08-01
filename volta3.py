@@ -13,9 +13,6 @@ cookies = EncryptedCookieManager(
     prefix="volta_app/",
     password="your_secret_key_here"  # Replace with the same secret key used in auth.py
 )
-if not cookies.ready():
-    st.warning("Cookies manager not ready. Waiting...")
-    st.stop()
 
 # Globals
 default_location = {
@@ -157,6 +154,10 @@ def get_current_location():
     return current_location
 
 def main():
+    if not cookies.ready():
+        st.warning("Cookies manager not ready. Please wait a moment and refresh the page.")
+        st.stop()
+
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = check_login_status()
 

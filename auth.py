@@ -85,10 +85,11 @@ def get_current_user():
     return st.session_state.get('current_user', None)
 
 def check_login_status():
-    if 'username' in cookies and 'expiry' in cookies:
-        expiry = datetime.fromisoformat(cookies['expiry'])
-        if datetime.now() < expiry:
-            st.session_state['logged_in'] = True
-            st.session_state['current_user'] = cookies['username']
-            return True
+    if cookies.ready():
+        if 'username' in cookies and 'expiry' in cookies:
+            expiry = datetime.fromisoformat(cookies['expiry'])
+            if datetime.now() < expiry:
+                st.session_state['logged_in'] = True
+                st.session_state['current_user'] = cookies['username']
+                return True
     return False
