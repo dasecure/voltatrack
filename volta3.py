@@ -154,9 +154,11 @@ def get_current_location():
     return current_location
 
 def main():
-    if not cookies.ready():
-        st.warning("Cookies manager not ready. Please wait a moment and refresh the page.")
-        st.stop()
+    try:
+        cookies_ready = cookies.ready()
+    except Exception as e:
+        cookies_ready = False
+        st.warning(f"Error with cookies: {str(e)}. Some features may be limited.")
 
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = check_login_status()

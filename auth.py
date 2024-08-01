@@ -55,9 +55,15 @@ def login_page():
         if verify_user(username, password):
             st.session_state['logged_in'] = True
             st.session_state['current_user'] = username
-            cookies['username'] = username
-            cookies['expiry'] = (datetime.now() + timedelta(days=7)).isoformat()
-            cookies.save()
+            try:
+                if cookies.ready():
+                    cookies['username'] = username
+                    cookies['expiry'] = (datetime.now() + timedelta(days=7)).isoformat()
+                    cookies.save()
+                else:
+                    st.warning("Cookies not ready. Session will not persist after browser close.")
+            except Exception as e:
+                st.warning(f"Error saving cookies: {str(e)}. Session will not persist after browser close.")
             st.success("Logged in successfully!")
             st.rerun()
         else:
@@ -85,11 +91,14 @@ def get_current_user():
     return st.session_state.get('current_user', None)
 
 def check_login_status():
-    if cookies.ready():
-        if 'username' in cookies and 'expiry' in cookies:
-            expiry = datetime.fromisoformat(cookies['expiry'])
-            if datetime.now() < expiry:
-                st.session_state['logged_in'] = True
-                st.session_state['current_user'] = cookies['username']
-                return True
+    try:
+        if cookies.ready():
+            if 'username' in cookies and 'expiry' in cookies:
+                expiry = datetime.fromisoformat(cookies['expiry'])
+                if datetime.now() < expiry:
+                    st.session_state['logged_in'] = True
+                    st.session_state['current_user'] = cookies['username']
+                    return True
+    except Exception as e:
+        st.warning(f"Error checking login status: {str(e)}")
     return False
