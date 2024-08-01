@@ -235,7 +235,8 @@ def main():
                                 charger['State'] = [state.split(']')[1].strip()]
                             else:
                                 # Otherwise, add the current user
-                                charger['State'] = [f"{current_user} [{state}]"]
+                                original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
+                                charger['State'] = [f"{current_user} [{original_state}]"]
                             st.rerun()
 
             # Display colored states legend
