@@ -1,6 +1,13 @@
 import sqlite3
 import hashlib
 import streamlit as st
+from streamlit_cookies_manager import EncryptedCookieManager
+from datetime import datetime, timedelta
+
+cookies = EncryptedCookieManager(
+    prefix="volta_app/",
+    password="your_secret_key_here"  # Replace with a secure secret key
+)
 
 def create_users_table():
     conn = sqlite3.connect('stations.sqlite')
@@ -48,6 +55,9 @@ def login_page():
         if verify_user(username, password):
             st.session_state['logged_in'] = True
             st.session_state['current_user'] = username
+            cookies['username'] = username
+            cookies['expiry'] = (datetime.now() + timedelta(days=7)).isoformat()
+            cookies.save()
             st.success("Logged in successfully!")
             st.rerun()
         else:
@@ -66,7 +76,19 @@ def signup_page():
 def logout():
     st.session_state['logged_in'] = False
     st.session_state['current_user'] = None
+    cookies['username'] = None
+    cookies['expiry'] = None
+    cookies.save()
     st.rerun()
 
 def get_current_user():
     return st.session_state.get('current_user', None)
+
+def check_login_status():
+    if 'username' in cookies and 'expiry' in cookies:
+        expiry = datetime.fromisoformat(cookies['expiry'])
+        if datetime.now() < expiry:
+            st.session_state['logged_in'] = True
+            st.session_state['current_user'] = cookies['username']
+            return True
+    return False

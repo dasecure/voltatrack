@@ -6,7 +6,13 @@ import requests
 import json
 import time
 from streamlit_geolocation import streamlit_geolocation
-from auth import create_users_table, login_page, signup_page, logout, get_current_user
+from auth import create_users_table, login_page, signup_page, logout, get_current_user, check_login_status
+from streamlit_cookies_manager import EncryptedCookieManager
+
+cookies = EncryptedCookieManager(
+    prefix="volta_app/",
+    password="your_secret_key_here"  # Replace with the same secret key used in auth.py
+)
 
 # Globals
 default_location = {
@@ -148,8 +154,10 @@ def get_current_location():
     return current_location
 
 def main():
+    cookies.load()
+    
     if 'logged_in' not in st.session_state:
-        st.session_state['logged_in'] = False
+        st.session_state['logged_in'] = check_login_status()
 
     if not st.session_state['logged_in']:
         tab1, tab2 = st.tabs(["Login", "Sign Up"])
@@ -163,6 +171,7 @@ def main():
 
         st.sidebar.title("Options")
         with st.sidebar:
+            st.write(f"Welcome, {st.session_state['current_user']}!")
             st.write("Select the maximum distance to search for nearby stations:")
             max_distance = st.slider("Maximum Distance (km)",  min_value=2, max_value=10, value=4, step=2)
             if st.button("Logout"):
