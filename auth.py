@@ -4,10 +4,18 @@ import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
 from datetime import datetime, timedelta
 
-cookies = EncryptedCookieManager(
-    prefix="volta_app/",
-    password="your_secret_key_here"  # Replace with a secure secret key
-)
+_cookie_manager = None
+
+def get_cookie_manager():
+    global _cookie_manager
+    if _cookie_manager is None:
+        _cookie_manager = EncryptedCookieManager(
+            prefix="volta_app/",
+            password="your_secret_key_here"  # Replace with a secure secret key
+        )
+    return _cookie_manager
+
+cookies = get_cookie_manager()
 
 def create_users_table():
     conn = sqlite3.connect('stations.sqlite')
