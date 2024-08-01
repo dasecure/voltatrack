@@ -230,7 +230,9 @@ def main():
                         if st.button(state, key=f"charger_{charger['Charger#']}_{state}"):
                             # Update the charger with the user's name
                             current_user = st.session_state.get('current_user', 'Unknown User')
-                            charger['State'] = [f"{current_user} ({state.split(']')[0].split('[')[1]})"]
+                            # Extract the state color if present, otherwise use the whole state
+                            state_color = state.split(']')[0].split('[')[-1] if '[' in state and ']' in state else state
+                            charger['State'] = [f"{current_user} ({state_color})"]
                             st.success(f"Charger #{charger['Charger#']} updated with {current_user}")
                             st.rerun()
 
