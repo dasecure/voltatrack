@@ -56,6 +56,7 @@ def login_page():
             st.session_state['logged_in'] = True
             st.session_state['current_user'] = username
             try:
+                cookies = get_cookie_manager()
                 if cookies.ready():
                     cookies['username'] = username
                     cookies['expiry'] = (datetime.now() + timedelta(days=7)).isoformat()
@@ -82,6 +83,7 @@ def signup_page():
 def logout():
     st.session_state['logged_in'] = False
     st.session_state['current_user'] = None
+    cookies = get_cookie_manager()
     cookies['username'] = None
     cookies['expiry'] = None
     cookies.save()
@@ -92,6 +94,7 @@ def get_current_user():
 
 def check_login_status():
     try:
+        cookies = get_cookie_manager()
         if cookies.ready():
             if 'username' in cookies and 'expiry' in cookies:
                 expiry = datetime.fromisoformat(cookies['expiry'])
