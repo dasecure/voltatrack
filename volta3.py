@@ -220,29 +220,32 @@ def main():
             st.write("---")
             st.subheader(f"Charger Details for: {st.session_state.clicked_location}")
             
+            # Create a DataFrame for better display
             for charger in st.session_state.clicked_stations_info:
-                st.write(f"Charger #{charger['Charger#']}")
-                for state in charger['State']:
-                    button_key = f"charger_{charger['Charger#']}_{state}"
-                    current_user = st.session_state.get('current_user', 'Unknown User')
-                    original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
-                    
-                    if '[' in state and ']' in state:
-                        # If the state already includes a user, show only the charging state
-                        button_text = f"[] [{original_state}]"
-                    else:
-                        # Otherwise, show user + charging state
-                        button_text = f"{current_user} [{original_state}]"
-                    
-                    if st.button(button_text, key=button_key):
-                        if button_text.startswith('[]'):
-                            # If the button text starts with [], change it to include the user
-                            charger['State'] = [f"{current_user} [{original_state}]"]
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    st.write(f"Charger #{charger['Charger#']}")
+                with col2:
+                    for state in charger['State']:
+                        button_key = f"charger_{charger['Charger#']}_{state}"
+                        current_user = st.session_state.get('current_user', 'Unknown User')
+                        original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
+                        
+                        if '[' in state and ']' in state:
+                            # If the state already includes a user, show only the charging state
+                            button_text = f"[] [{original_state}]"
                         else:
-                            # Otherwise, set it to [] + charging state
-                            charger['State'] = [f"[] [{original_state}]"]
-                        st.rerun()
-                st.write("---")
+                            # Otherwise, show user + charging state
+                            button_text = f"{current_user} [{original_state}]"
+                        
+                        if st.button(button_text, key=button_key):
+                            if button_text.startswith('[]'):
+                                # If the button text starts with [], change it to include the user
+                                charger['State'] = [f"{current_user} [{original_state}]"]
+                            else:
+                                # Otherwise, set it to [] + charging state
+                                charger['State'] = [f"[] [{original_state}]"]
+                            st.rerun()
 
             # Display colored states legend
             st.write("State Color Code:")
@@ -252,6 +255,8 @@ def main():
             
             if st.button("Close Details"):
                 st.session_state.show_details = False
+            
+            st.write("---")
         
         # Close the database connection
 
