@@ -228,16 +228,14 @@ def main():
                 with col2:
                     for state in charger['State']:
                         button_key = f"charger_{charger['Charger#']}_{state}"
-                        if button_key not in st.session_state:
-                            st.session_state[button_key] = False
-
                         if st.button(state, key=button_key):
-                            st.session_state[button_key] = not st.session_state[button_key]
-                            if st.session_state[button_key]:
-                                current_user = st.session_state.get('current_user', 'Unknown User')
-                                charger['State'] = [f"{current_user} ({state})"]
+                            current_user = st.session_state.get('current_user', 'Unknown User')
+                            if '[' in state and ']' in state:
+                                # If the state already includes a user, reset it
+                                charger['State'] = [state.split(']')[1].strip()]
                             else:
-                                charger['State'] = [state]
+                                # Otherwise, add the current user
+                                charger['State'] = [f"{current_user} [{state}]"]
                             st.rerun()
 
             # Display colored states legend
