@@ -1,3 +1,4 @@
 geopy
 requests
 streamlit_geolocation
+streamlit-cookies-manager
