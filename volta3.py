@@ -227,13 +227,17 @@ def main():
                     st.write(f"Charger #{charger['Charger#']}")
                 with col2:
                     for state in charger['State']:
-                        if st.button(state, key=f"charger_{charger['Charger#']}_{state}"):
-                            # Update the charger with the user's name
-                            current_user = st.session_state.get('current_user', 'Unknown User')
-                            # Extract the state color if present, otherwise use the whole state
-                            state_color = state.split(']')[0].split('[')[-1] if '[' in state and ']' in state else state
-                            charger['State'] = [f"{current_user} ({state_color})"]
-                            st.success(f"Charger #{charger['Charger#']} updated with {current_user}")
+                        button_key = f"charger_{charger['Charger#']}_{state}"
+                        if button_key not in st.session_state:
+                            st.session_state[button_key] = False
+
+                        if st.button(state, key=button_key):
+                            st.session_state[button_key] = not st.session_state[button_key]
+                            if st.session_state[button_key]:
+                                current_user = st.session_state.get('current_user', 'Unknown User')
+                                charger['State'] = [f"{current_user} ({state})"]
+                            else:
+                                charger['State'] = [state]
                             st.rerun()
 
             # Display colored states legend
