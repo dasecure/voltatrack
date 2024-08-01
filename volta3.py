@@ -6,10 +6,6 @@ import requests
 import json
 import time
 from streamlit_geolocation import streamlit_geolocation
-from auth import create_users_table, login_page, signup_page, logout, get_current_user, check_login_status
-from auth import get_cookie_manager
-
-cookies = get_cookie_manager()
 
 # Globals
 default_location = {
@@ -20,14 +16,7 @@ display_list = []
 
 def handle_location_click(location):
     st.session_state.clicked_location = location
-    current_user = get_current_user()
-    if current_user:
-        st.success(f"User {current_user} clicked on location: {location}")
-    else:
-        st.warning("No user is currently logged in.")
-
-# Create users table if it doesn't exist
-create_users_table()
+    st.success(f"Clicked on location: {location}")
 
 # get station data
 # Function to get stations data
@@ -151,32 +140,13 @@ def get_current_location():
     return current_location
 
 def main():
-    try:
-        cookies_ready = cookies.ready()
-    except Exception as e:
-        cookies_ready = False
-        st.warning(f"Error with cookies: {str(e)}. Some features may be limited.")
+    # Display the title
+    display_title()
 
-    if 'logged_in' not in st.session_state:
-        st.session_state['logged_in'] = check_login_status()
-
-    if not st.session_state['logged_in']:
-        tab1, tab2 = st.tabs(["Login", "Sign Up"])
-        with tab1:
-            login_page()
-        with tab2:
-            signup_page()
-    else:
-        # Display the title
-        display_title()
-
-        st.sidebar.title("Options")
-        with st.sidebar:
-            st.write(f"Welcome, {st.session_state['current_user']}!")
-            st.write("Select the maximum distance to search for nearby stations:")
-            max_distance = st.slider("Maximum Distance (km)",  min_value=2, max_value=10, value=4, step=2)
-            if st.button("Logout"):
-                logout()
+    st.sidebar.title("Options")
+    with st.sidebar:
+        st.write("Select the maximum distance to search for nearby stations:")
+        max_distance = st.slider("Maximum Distance (km)",  min_value=2, max_value=10, value=4, step=2)
 
         # Connect to your SQLite database
         conn = sqlite3.connect('stations.sqlite')
@@ -228,24 +198,10 @@ def main():
                 with col2:
                     for state in charger['State']:
                         button_key = f"charger_{charger['Charger#']}_{state}"
-                        current_user = st.session_state.get('current_user', 'Unknown User')
                         original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
                         
-                        current_state = charger['State'][0]
-                        if current_state == current_user:
-                            # If the current state is the user, show the charging state
-                            button_text = original_state
-                        else:
-                            # Otherwise, show the user
-                            button_text = current_user
-                        
-                        if st.button(button_text, key=button_key):
-                            if button_text == current_user:
-                                # If the button text is the user, change it to show the charging state
-                                charger['State'] = [original_state]
-                            else:
-                                # Otherwise, set it to the user
-                                charger['State'] = [current_user]
+                        if st.button(original_state, key=button_key):
+                            st.write(f"Clicked on {original_state}")
                             st.rerun()
 
             # Display colored states legend
