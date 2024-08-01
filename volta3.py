@@ -157,19 +157,16 @@ def main():
         cookies_ready = False
         st.warning(f"Error with cookies: {str(e)}. Some features may be limited.")
 
-    # if 'logged_in' not in st.session_state:
-    #     st.session_state['logged_in'] = check_login_status()
+    if 'logged_in' not in st.session_state:
+        st.session_state['logged_in'] = check_login_status()
 
-    # if not st.session_state['logged_in']:
-    #     tab1, tab2 = st.tabs(["Login", "Sign Up"])
-    #     with tab1:
-    #         login_page()
-    #     with tab2:
-    #         signup_page()
-
-    # else:
-
-    if True:    
+    if not st.session_state['logged_in']:
+        tab1, tab2 = st.tabs(["Login", "Sign Up"])
+        with tab1:
+            login_page()
+        with tab2:
+            signup_page()
+    else:
         # Display the title
         display_title()
 
@@ -234,20 +231,21 @@ def main():
                         current_user = st.session_state.get('current_user', 'Unknown User')
                         original_state = state.replace(':green[', '').replace(':orange[', '').replace(':red[', '').replace(']', '')
                         
-                        if '[' in state and ']' in state:
-                            # If the state already includes a user, show only the charging state
-                            button_text = f"{original_state}"
+                        current_state = charger['State'][0]
+                        if current_state == current_user:
+                            # If the current state is the user, show the charging state
+                            button_text = original_state
                         else:
                             # Otherwise, show the user
-                            button_text = f"{current_user}"
+                            button_text = current_user
                         
                         if st.button(button_text, key=button_key):
-                            if button_text == original_state:
-                                # If the button text is the charging state, change it to show the user
-                                charger['State'] = [f"{current_user}"]
+                            if button_text == current_user:
+                                # If the button text is the user, change it to show the charging state
+                                charger['State'] = [original_state]
                             else:
-                                # Otherwise, set it to the charging state
-                                charger['State'] = [f"{original_state}"]
+                                # Otherwise, set it to the user
+                                charger['State'] = [current_user]
                             st.rerun()
 
             # Display colored states legend
