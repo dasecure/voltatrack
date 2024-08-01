@@ -157,16 +157,19 @@ def main():
         cookies_ready = False
         st.warning(f"Error with cookies: {str(e)}. Some features may be limited.")
 
-    if 'logged_in' not in st.session_state:
-        st.session_state['logged_in'] = check_login_status()
+    # if 'logged_in' not in st.session_state:
+    #     st.session_state['logged_in'] = check_login_status()
 
-    if not st.session_state['logged_in']:
-        tab1, tab2 = st.tabs(["Login", "Sign Up"])
-        with tab1:
-            login_page()
-        with tab2:
-            signup_page()
-    else:
+    # if not st.session_state['logged_in']:
+    #     tab1, tab2 = st.tabs(["Login", "Sign Up"])
+    #     with tab1:
+    #         login_page()
+    #     with tab2:
+    #         signup_page()
+
+    # else:
+
+    if True:    
         # Display the title
         display_title()
 
