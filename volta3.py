@@ -214,10 +214,12 @@ def main():
                     st.session_state.show_details = True
             with col2:
                 state_key = f"state_button_{station[0]}"
-                if state_key not in st.session_state:
-                    st.session_state[state_key] = False
-                if st.button(summary if not st.session_state[state_key] else st.session_state['current_user'], key=state_key):
-                    st.session_state[state_key] = not st.session_state[state_key]
+                button_text = summary if state_key not in st.session_state else st.session_state['current_user']
+                if st.button(button_text, key=state_key):
+                    if state_key not in st.session_state:
+                        st.session_state[state_key] = True
+                    else:
+                        del st.session_state[state_key]
 
         # Display clicked location information
         if 'show_details' in st.session_state and st.session_state.show_details:
